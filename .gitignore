@@ -1,0 +1,44 @@
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+k8s/secret.yaml
+*.secret.yaml
+*.pem
+*.key
+
+# Local database & vector store
+chroma_data/
+*.sqlite3
+*.db
+.local/
+
+# Python runtime, venv & caches
+.venv/
+dashboard/.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Linters & testing
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Logs & temp files
+*.log
+logs/
+.context/
+evals/results/*.json
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+RUNBOOK.md
