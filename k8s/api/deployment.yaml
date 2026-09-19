@@ -1,0 +1,63 @@
+# CAVEAT: app/agents/memory.py and app/tools/chroma_tool.py use chromadb.PersistentClient
+# (embedded, file-backed) — not safe for concurrent writes from multiple pods sharing one PVC.
+# Fine for a single API replica; for real 3-replica HA, run a chromadb server (HttpClient)
+# instead and point CHROMA_PERSIST_DIR-based code at it. Shipped as-is to match what Sprints
+# 2-4 actually built and tested (embedded mode) — flagging so it isn't silently wrong in prod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus-api
+  namespace: nexus
+  labels:
+    app: nexus-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nexus-api
+  template:
+    metadata:
+      labels:
+        app: nexus-api
+    spec:
+      containers:
+        - name: api
+          image: nexus-api:latest
+          command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: nexus-config
+            - secretRef:
+                name: nexus-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          volumeMounts:
+            - name: chroma-data
+              mountPath: /data/chroma
+            - name: reports-data
+              mountPath: /data/reports
+      volumes:
+        - name: chroma-data
+          persistentVolumeClaim:
+            claimName: chromadb-pvc
+        - name: reports-data
+          emptyDir: {}

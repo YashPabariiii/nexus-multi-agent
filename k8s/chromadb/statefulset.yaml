@@ -1,0 +1,14 @@
+# NOTE: despite the directory name (kept for parity with the requested structure), this
+# provisions a plain PVC, not a StatefulSet — there's no separate chromadb server process.
+# The API/worker pods mount this PVC directly at CHROMA_PERSIST_DIR for the embedded
+# chromadb.PersistentClient (see caveat in k8s/api/deployment.yaml re: multi-pod write safety).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chromadb-pvc
+  namespace: nexus
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 20Gi

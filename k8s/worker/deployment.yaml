@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus-worker
+  namespace: nexus
+  labels:
+    app: nexus-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nexus-worker
+  template:
+    metadata:
+      labels:
+        app: nexus-worker
+    spec:
+      containers:
+        - name: worker
+          image: nexus-api:latest
+          command: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
+          envFrom:
+            - configMapRef:
+                name: nexus-config
+            - secretRef:
+                name: nexus-secrets
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "2000m"
+              memory: "3Gi"
+          volumeMounts:
+            - name: chroma-data
+              mountPath: /data/chroma
+            - name: reports-data
+              mountPath: /data/reports
+      volumes:
+        - name: chroma-data
+          persistentVolumeClaim:
+            claimName: chromadb-pvc
+        - name: reports-data
+          emptyDir: {}

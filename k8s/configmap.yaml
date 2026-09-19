@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexus-config
+  namespace: nexus
+data:
+  DATABASE_URL: "postgresql+asyncpg://nexus:nexus@postgres:5432/nexus"
+  REDIS_URL: "redis://redis:6379/0"
+  CHROMA_PERSIST_DIR: "/data/chroma"
+  REPORTS_DIR: "/data/reports"
+  GROQ_MODEL_LARGE: "llama-3.3-70b-versatile"
+  GROQ_MODEL_SMALL: "llama-3.1-8b-instant"
+  GEMINI_MODEL: "gemini-1.5-flash"
+  LANGFUSE_HOST: "https://cloud.langfuse.com"
+  FREE_TIER_BRIEF_LIMIT: "5"
+  FREE_TIER_DEPTH_LIMIT: "standard"
+  LOG_LEVEL: "INFO"
+  ENVIRONMENT: "production"
